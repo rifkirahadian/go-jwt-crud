@@ -6,6 +6,7 @@ import (
 	"jwt-crud/handlers"
 	"jwt-crud/configs"
 	"jwt-crud/helpers"
+	"jwt-crud/models"
 	"gopkg.in/go-playground/validator.v9"
 	"github.com/labstack/echo/middleware"
 )
@@ -20,14 +21,17 @@ func (cv *CustomValidator) Validate(i interface{}) error {
 
 func main()  {
 	e := echo.New()
-	db := configs.InitDB("storage.db")
-	configs.Migrate(db)
+
+	db := configs.InitGormDB()
+	db.AutoMigrate(&models.Task{})
+	db.AutoMigrate(&models.User{})
+
 	e.Validator = &CustomValidator{validator: validator.New()}
 	e.HTTPErrorHandler = helpers.ValidationResponse
 
 	//no auth routes
-	e.POST("/register", handlers.Register(db))
-	e.POST("/login", handlers.Login(db))
+	e.POST("/register", handlers.Register())
+	// e.POST("/login", handlers.Login(db))
 	
 	//auth middleware
 	r := e.Group("/auth")

@@ -1,38 +1,35 @@
 package handlers
 
 import (
-	"database/sql"
 	"net/http"
 	"jwt-crud/models"
 	"jwt-crud/helpers"
+	"jwt-crud/configs"
 	"github.com/labstack/echo"
 )
 
 type H map[string]interface{}
 
-func Register(db *sql.DB) echo.HandlerFunc  {
+func Register() echo.HandlerFunc  {
 	return func (c echo.Context) error {
 		u := new(models.User)
-
-		if err := c.Bind(u); err != nil {
-			return err
-		}
-
+		c.Bind(u)
 		if err := c.Validate(u); err != nil {
 			return err 
 		}
 
 		hash, _ := helpers.HashPassword(u.Password)
-		
-		id, err := models.CreateUser(db, u.Name, u.Email, hash)
-		if err == nil {
-			return c.JSON(http.StatusOK, H{
-				"created": id,
+		u.Password = hash
+
+		db := configs.InitGormDB()
+		if err := db.Create(&u).Error; err != nil {
+			return c.JSON(400, H{
+				"message": "Email is already in use",
 			})
-		}else{
-			return err
 		}
 
-		return c.String(http.StatusOK, u.Name)
+		return c.JSON(http.StatusOK, H{
+			"message": "Register success",
+		})
 	}
 }
