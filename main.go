@@ -31,7 +31,7 @@ func main()  {
 
 	//no auth routes
 	e.POST("/register", handlers.Register())
-	// e.POST("/login", handlers.Login(db))
+	e.POST("/login", handlers.Login())
 	
 	//auth middleware
 	r := e.Group("/auth")
