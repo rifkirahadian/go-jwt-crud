@@ -8,8 +8,6 @@ import (
 	"github.com/labstack/echo"
 )
 
-type H map[string]interface{}
-
 func Register() echo.HandlerFunc  {
 	return func (c echo.Context) error {
 		u := new(models.User)
